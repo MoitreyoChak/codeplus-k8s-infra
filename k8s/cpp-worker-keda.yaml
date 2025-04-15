@@ -1,14 +1,14 @@
 apiVersion: keda.sh/v1alpha1
 kind: ScaledJob
 metadata:
-  name: c-code-execution-job
+  name: cpp-code-execution-job
 spec:
   jobTargetRef:
     template:
       spec:
         containers:
-          - name: c-executor
-            image: moitreyo/worker-container
+          - name: cpp-executor
+            image: moitreyo/cpp-worker-container # This should be the image built from the Dockerfile
             env:
               - name: BROKER_URL
                 value: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
@@ -25,7 +25,7 @@ spec:
     - type: rabbitmq
       metadata:
         protocol: amqp
-        queueName: c-code-queue
+        queueName: cpp-code-queue
         mode: QueueLength
         value: "1"
         host: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
