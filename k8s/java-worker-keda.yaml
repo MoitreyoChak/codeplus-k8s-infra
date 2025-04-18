@@ -1,0 +1,31 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: java-code-execution-job
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        containers:
+          - name: java-executor
+            image: moitreyo/java-worker-container # This should be the image built from the Dockerfile
+            env:
+              - name: BROKER_URL
+                value: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
+              - name: NATS_URL
+                value: nats://nats:4222
+              - name: MONGO_URI
+                value: mongodb://ques-mongo-srv:27017/userdb
+        restartPolicy: Never
+  pollingInterval: 5
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 5
+  maxReplicaCount: 10
+  triggers:
+    - type: rabbitmq
+      metadata:
+        protocol: amqp
+        queueName: java-code-queue
+        mode: QueueLength
+        value: "1"
+        host: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
